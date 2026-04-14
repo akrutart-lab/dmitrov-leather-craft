@@ -22,10 +22,8 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(supabaseUrl, serviceKey);
 
-    // Save user message
     await sb.from("chat_messages").insert({ session_id, role: "user", content: message });
 
-    // Load products + categories + session for context
     const [{ data: products }, { data: categories }, { data: history }, { data: session }] = await Promise.all([
       sb.from("products").select("id, name, description, price, in_stock, slug, category_id, image_url").eq("in_stock", true),
       sb.from("categories").select("id, name, description"),
@@ -33,7 +31,6 @@ serve(async (req) => {
       sb.from("chat_sessions").select("customer_name, customer_phone").eq("id", session_id).single(),
     ]);
 
-    // Build product catalog context
     const categoryMap: Record<string, string> = {};
     (categories || []).forEach((c: any) => { categoryMap[c.id] = c.name; });
 
@@ -58,12 +55,26 @@ serve(async (req) => {
 Этот формат отрендерится как красивая карточка с фото и кнопкой "В корзину".
 Показывай карточки товаров когда покупатель спрашивает что есть, или когда рекомендуешь конкретный товар.
 
+ВАЖНО — Кастомизация:
+Когда покупатель хочет кастомизацию (другой цвет кожи, фурнитуру, гравировку, нестандартный размер), обсуди детали и рассчитай итоговую цену.
+Примеры доплат:
+- Гравировка: +500 ₽
+- Нестандартный размер: +300 ₽
+- Премиальная фурнитура (латунь ручной работы): +800 ₽
+- Смена цвета кожи (при наличии): бесплатно
+Итоговая цена = базовая цена товара + доплаты за кастомизацию.
+
 ВАЖНО — Оформление заявки:
 Когда покупатель подтвердил что хочет купить конкретные товары, выведи блок заказа в формате:
-[ORDER:id1:кол1,id2:кол2]
-Например: [ORDER:abc-123:1,def-456:2]
+[ORDER:id:кол-во:итоговая_цена:описание кастомизации]
+Если несколько товаров, разделяй запятой:
+[ORDER:id1:1:5500:Кожа коньяк фурнитура латунь,id2:2:3000:]
+- id — id товара из каталога
+- кол-во — количество (по умолчанию 1)
+- итоговая_цена — цена ЗА ЕДИНИЦУ с учётом кастомизации (если кастомизации нет — базовая цена)
+- описание кастомизации — текст с деталями (цвет, размер, фурнитура, гравировка). Если кастомизации нет — оставь пустым
 После этого блока напиши что заявка оформлена и с покупателем свяжутся.
-Используй ТОЛЬКО id товаров из каталога. Количество по умолчанию 1.
+Используй ТОЛЬКО id товаров из каталога.
 
 Если не можешь помочь или покупатель просит связаться с мастером — скажи что переключаешь на оператора.
 
@@ -136,20 +147,23 @@ ${catalog || "Каталог пуст"}
         }
       } finally {
         await writer.close();
-        // Save assistant message
         if (fullContent) {
           await sb.from("chat_messages").insert({ session_id, role: "assistant", content: fullContent });
           
-          // Check for ORDER markers and create order automatically
           const orderMatch = fullContent.match(/\[ORDER:([^\]]+)\]/);
           if (orderMatch && session) {
             try {
+              // New format: id:qty:price:customization, ...
               const orderItems = orderMatch[1].split(",").map((item: string) => {
-                const [id, qty] = item.trim().split(":");
-                return { id: id.trim(), qty: parseInt(qty) || 1 };
+                const parts = item.trim().split(":");
+                return {
+                  id: parts[0]?.trim() || "",
+                  qty: parseInt(parts[1]) || 1,
+                  customPrice: parts[2] ? parseInt(parts[2]) : null,
+                  customization: parts.slice(3).join(":").trim() || null,
+                };
               });
 
-              // Look up product details
               const productIds = orderItems.map((i: any) => i.id);
               const { data: orderProducts } = await sb
                 .from("products")
@@ -159,7 +173,8 @@ ${catalog || "Каталог пуст"}
               if (orderProducts && orderProducts.length > 0) {
                 const total = orderItems.reduce((sum: number, item: any) => {
                   const prod = orderProducts.find((p: any) => p.id === item.id);
-                  return sum + (prod ? prod.price * item.qty : 0);
+                  const unitPrice = item.customPrice || (prod ? prod.price : 0);
+                  return sum + unitPrice * item.qty;
                 }, 0);
 
                 const { data: order } = await sb.from("orders").insert({
@@ -179,8 +194,9 @@ ${catalog || "Каталог пуст"}
                         order_id: order.id,
                         product_id: prod.id,
                         product_name: prod.name,
-                        price: prod.price,
+                        price: item.customPrice || prod.price,
                         quantity: item.qty,
+                        customization: item.customization,
                       };
                     })
                     .filter(Boolean);
