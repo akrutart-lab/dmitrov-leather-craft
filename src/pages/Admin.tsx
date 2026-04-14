@@ -112,6 +112,12 @@ function OrdersTab() {
             {new Date(order.created_at).toLocaleString('ru-RU')} · {order.delivery_method === 'delivery' ? 'Доставка' : 'Самовывоз'}
             {order.customer_comment && ` · ${order.customer_comment}`}
           </p>
+          {order.delivery_method === 'delivery' && (order as any).delivery_address && (
+            <p className="text-xs text-muted-foreground">📍 Адрес доставки: <span className="text-foreground">{(order as any).delivery_address}</span></p>
+          )}
+          {order.delivery_method === 'pickup' && (
+            <p className="text-xs text-muted-foreground">📍 Самовывоз: г. Дмитров, ул. Межевая, д. 2Б</p>
+          )}
           {order.order_items && order.order_items.length > 0 && (
             <div className="text-sm space-y-1">
               {order.order_items.map(item => (

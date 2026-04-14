@@ -190,20 +190,30 @@ export default function Cart() {
                       {opt.label}
                     </button>
                   ))}
-                </div>
+              </div>
               </div>
 
+              {form.delivery === 'pickup' && (
+                <div className="bg-muted/50 border border-border px-4 py-3 text-sm">
+                  <span className="text-muted-foreground">Адрес самовывоза: </span>
+                  <span className="text-foreground">г. Дмитров, ул. Межевая, д. 2Б</span>
+                </div>
+              )}
+
               {form.delivery === 'delivery' && (
-                <div>
-                  <label className="text-xs tracking-wider uppercase text-muted-foreground mb-2 block">Адрес доставки</label>
-                  <input
-                    type="text"
-                    value={form.address}
-                    onChange={e => setForm({ ...form, address: e.target.value })}
-                    placeholder="Город, улица, дом, квартира"
-                    className="w-full bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
-                    maxLength={500}
-                  />
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs tracking-wider uppercase text-muted-foreground mb-2 block">Адрес доставки</label>
+                    <input
+                      type="text"
+                      value={form.address}
+                      onChange={e => setForm({ ...form, address: e.target.value })}
+                      placeholder="Город, улица, дом, квартира"
+                      className="w-full bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
+                      maxLength={500}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Стоимость доставки рассчитывается индивидуально — мы сообщим при подтверждении заказа</p>
                 </div>
               )}
 
