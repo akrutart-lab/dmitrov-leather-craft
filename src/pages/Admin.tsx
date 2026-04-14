@@ -37,6 +37,17 @@ export default function Admin() {
     refetchInterval: 30000,
   });
 
+  // Ticket count for chats badge
+  const { data: ticketCount } = useQuery({
+    queryKey: ['admin-ticket-count'],
+    queryFn: async () => {
+      const { count } = await supabase.from('chat_sessions').select('*', { count: 'exact', head: true }).eq('status', 'ticket');
+      return count || 0;
+    },
+    enabled: isAdmin === true,
+    refetchInterval: 15000,
+  });
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/admin/login');
@@ -48,6 +59,7 @@ export default function Admin() {
     { key: 'orders', label: 'Заявки', icon: ShoppingBag, badge: newCount || undefined },
     { key: 'products', label: 'Товары', icon: Package },
     { key: 'categories', label: 'Категории', icon: FolderOpen },
+    { key: 'chats', label: 'Чаты', icon: MessageCircle, badge: ticketCount || undefined },
   ];
 
   return (
@@ -84,6 +96,7 @@ export default function Admin() {
         {tab === 'orders' && <OrdersTab />}
         {tab === 'products' && <ProductsTab />}
         {tab === 'categories' && <CategoriesTab />}
+        {tab === 'chats' && <ChatsTab />}
       </div>
     </div>
   );
