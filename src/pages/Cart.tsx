@@ -57,6 +57,7 @@ export default function Cart() {
       setSent(true);
       toast.success('Заявка отправлена!');
     } catch (err) {
+      console.error('Order submit error:', err);
       toast.error('Ошибка при отправке. Попробуйте ещё раз.');
     } finally {
       setSending(false);
