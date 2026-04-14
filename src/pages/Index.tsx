@@ -3,13 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight } from 'lucide-react';
 
-const categories = [
-  { slug: 'bags', title: 'Сумки', desc: 'Шопперы, кросс-боди и другие модели — каждая сумка создана вручную из отборной кожи растительного дубления.' },
-  { slug: 'doc-holders', title: 'Докхолдеры', desc: 'Элегантные обложки для документов — надёжная защита и безупречный стиль.' },
-  { slug: 'belts', title: 'Ремни', desc: 'Классические и современные ремни ручной работы — акцент, который завершает образ.' },
-  { slug: 'wallets', title: 'Кошельки', desc: 'Портмоне и кошельки из натуральной кожи — компактность и благородство в каждой детали.' },
-];
-
 const advantages = [
   { icon: '✦', title: 'Ручная работа', desc: 'Каждое изделие создаётся мастером вручную от выкройки до финишной обработки' },
   { icon: '◈', title: 'Натуральная кожа', desc: 'Используем кожу растительного дубления — она становится красивее с годами' },
@@ -17,15 +10,13 @@ const advantages = [
 ];
 
 export default function Index() {
-  const { data: featuredProducts } = useQuery({
-    queryKey: ['featured-products'],
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('products')
+        .from('categories')
         .select('*')
-        .eq('in_stock', true)
-        .order('created_at', { ascending: false })
-        .limit(4);
+        .order('sort_order');
       return data || [];
     },
   });
@@ -49,27 +40,33 @@ export default function Index() {
             <ArrowRight size={16} strokeWidth={1} />
           </Link>
         </div>
-
-        {/* Decorative elements */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent to-primary/30" />
       </section>
 
       {/* Zigzag categories */}
-      {categories.map((cat, i) => (
+      {categories?.map((cat, i) => (
         <section key={cat.slug} className="py-20 md:py-28">
           <div className={`max-w-7xl mx-auto px-6 flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12 md:gap-20`}>
             <div className="w-full md:w-1/2">
               <div className="aspect-[4/5] bg-muted/50 rounded-sm overflow-hidden">
-                {/* Category image placeholder */}
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
-                  <span className="font-serif text-4xl text-muted-foreground/30">{cat.title}</span>
-                </div>
+                {cat.image_url ? (
+                  <img
+                    src={cat.image_url}
+                    alt={cat.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
+                    <span className="font-serif text-4xl text-muted-foreground/30">{cat.name}</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="w-full md:w-1/2 space-y-6">
               <p className="text-xs tracking-[0.3em] uppercase text-primary/60 font-sans">Категория</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground">{cat.title}</h2>
-              <p className="text-muted-foreground font-light leading-relaxed max-w-md">{cat.desc}</p>
+              <h2 className="font-serif text-4xl md:text-5xl text-foreground">{cat.name}</h2>
+              <p className="text-muted-foreground font-light leading-relaxed max-w-md">{cat.description}</p>
               <Link
                 to={`/catalog?category=${cat.slug}`}
                 className="inline-flex items-center gap-2 text-primary text-sm tracking-wider uppercase font-sans font-light hover:gap-4 transition-all duration-300"
