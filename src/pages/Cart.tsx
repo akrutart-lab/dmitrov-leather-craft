@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { Link } from 'react-router-dom';
 import { Minus, Plus, X, ArrowLeft, Send } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
@@ -27,23 +28,24 @@ export default function Cart() {
 
     setSending(true);
     try {
-      const { data: order, error: orderError } = await supabase
+      const orderId = crypto.randomUUID();
+
+      const { error: orderError } = await supabase
         .from('orders')
         .insert({
+          id: orderId,
           customer_name: form.name.trim(),
           customer_phone: form.phone.trim(),
           customer_comment: form.comment.trim() || null,
           delivery_method: form.delivery,
           delivery_address: form.delivery === 'delivery' ? (form.address.trim() || null) : null,
           total,
-        } as any)
-        .select()
-        .single();
+        } as any);
 
       if (orderError) throw orderError;
 
       const orderItems = items.map(item => ({
-        order_id: order.id,
+        order_id: orderId,
         product_id: item.id,
         product_name: item.name,
         quantity: item.quantity,
