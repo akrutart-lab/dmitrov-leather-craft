@@ -95,6 +95,7 @@ export type Database = {
           customer_comment: string | null
           customer_name: string
           customer_phone: string
+          delivery_address: string | null
           delivery_method: string
           id: string
           status: Database["public"]["Enums"]["order_status"]
@@ -106,6 +107,7 @@ export type Database = {
           customer_comment?: string | null
           customer_name: string
           customer_phone: string
+          delivery_address?: string | null
           delivery_method?: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -117,6 +119,7 @@ export type Database = {
           customer_comment?: string | null
           customer_name?: string
           customer_phone?: string
+          delivery_address?: string | null
           delivery_method?: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
