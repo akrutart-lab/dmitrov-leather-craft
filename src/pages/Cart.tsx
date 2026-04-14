@@ -107,8 +107,8 @@ export default function Cart() {
           <div className="space-y-12">
             {/* Items */}
             <div className="space-y-6">
-              {items.map(item => (
-                <div key={item.id} className="flex gap-4 md:gap-6 py-6 border-b border-border">
+              {items.map((item, index) => (
+                <div key={`${item.id}-${index}`} className="flex gap-4 md:gap-6 py-6 border-b border-border">
                   <div className="w-20 h-24 md:w-24 md:h-32 bg-muted rounded-sm overflow-hidden flex-shrink-0">
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />

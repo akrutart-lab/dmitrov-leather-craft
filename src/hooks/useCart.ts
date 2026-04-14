@@ -19,8 +19,8 @@ export function useCart() {
     setItems(getCart());
   }, []);
 
-  const removeItem = useCallback((id: string) => {
-    removeFromCartLib(id);
+  const removeItem = useCallback((id: string, index?: number) => {
+    removeFromCartLib(id, index);
     setItems(getCart());
   }, []);
 
