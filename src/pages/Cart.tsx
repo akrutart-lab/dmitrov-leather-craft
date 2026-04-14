@@ -49,7 +49,8 @@ export default function Cart() {
         product_id: item.id,
         product_name: item.name,
         quantity: item.quantity,
-        price: item.price,
+        price: item.customPrice || item.price,
+        customization: item.customization || null,
       }));
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
@@ -107,8 +108,8 @@ export default function Cart() {
           <div className="space-y-12">
             {/* Items */}
             <div className="space-y-6">
-              {items.map(item => (
-                <div key={item.id} className="flex gap-4 md:gap-6 py-6 border-b border-border">
+              {items.map((item, index) => (
+                <div key={`${item.id}-${index}`} className="flex gap-4 md:gap-6 py-6 border-b border-border">
                   <div className="w-20 h-24 md:w-24 md:h-32 bg-muted rounded-sm overflow-hidden flex-shrink-0">
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
@@ -116,14 +117,17 @@ export default function Cart() {
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 font-serif text-sm">К.АЯ</div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h3 className="font-serif text-lg text-foreground truncate pr-4">{item.name}</h3>
-                      <button onClick={() => removeItem(item.id)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+                      <button onClick={() => removeItem(item.id, index)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
                         <X size={16} />
                       </button>
                     </div>
-                    <p className="text-primary mt-1">{priceFormat(item.price)} ₽</p>
+                    {item.customization && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">✏️ {item.customization}</p>
+                    )}
+                    <p className="text-primary mt-1">{priceFormat(item.customPrice || item.price)} ₽</p>
                     <div className="flex items-center gap-3 mt-3">
                       <button onClick={() => setQuantity(item.id, item.quantity - 1)} className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
                         <Minus size={12} />

@@ -35,15 +35,20 @@ function ProductCard({ id, name, price, imageUrl, slug }: { id: string; name: st
   );
 }
 
-function OrderBlock({ items, navigate }: { items: { id: string; name: string; price: number; qty: number }[]; navigate: (path: string) => void }) {
+function OrderBlock({ items, navigate }: { items: { id: string; name: string; price: number; qty: number; customization?: string }[]; navigate: (path: string) => void }) {
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
   return (
     <div className="p-3 rounded-lg border-2 border-primary/50 bg-primary/5 my-2">
       <p className="text-sm font-semibold mb-2">🎉 Заявка оформлена!</p>
       {items.map((item, i) => (
-        <div key={i} className="flex justify-between text-xs">
-          <span>{item.name} × {item.qty}</span>
-          <span>{(item.price * item.qty).toLocaleString('ru-RU')} ₽</span>
+        <div key={i} className="text-xs mb-1">
+          <div className="flex justify-between">
+            <span>{item.name} × {item.qty}</span>
+            <span>{(item.price * item.qty).toLocaleString('ru-RU')} ₽</span>
+          </div>
+          {item.customization && (
+            <p className="text-muted-foreground ml-2 italic">✏️ {item.customization}</p>
+          )}
         </div>
       ))}
       <div className="flex justify-between text-sm font-semibold mt-2 pt-2 border-t border-border">
@@ -52,7 +57,14 @@ function OrderBlock({ items, navigate }: { items: { id: string; name: string; pr
       </div>
       <button
         onClick={() => {
-          items.forEach(item => addToCart({ id: item.id, name: item.name, price: item.price, image_url: null }));
+          items.forEach(item => addToCart({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            image_url: null,
+            customization: item.customization,
+            customPrice: item.customization ? item.price : undefined,
+          }));
           navigate('/cart');
         }}
         className="mt-2 w-full bg-primary text-primary-foreground text-xs py-1.5 rounded hover:opacity-90 transition-opacity"
@@ -63,7 +75,7 @@ function OrderBlock({ items, navigate }: { items: { id: string; name: string; pr
   );
 }
 
-// Parse [PRODUCT:id|name|price|image_url|slug] and [ORDER:id1:qty1,id2:qty2]
+// Parse [PRODUCT:id|name|price|image_url|slug] and [ORDER:id:qty:price:customization,...]
 function parseSpecialBlocks(text: string, products: Map<string, any>, navigate: (path: string) => void) {
   const parts: (string | JSX.Element)[] = [];
   const regex = /\[PRODUCT:([^\]]+)\]|\[ORDER:([^\]]+)\]/g;
@@ -76,7 +88,6 @@ function parseSpecialBlocks(text: string, products: Map<string, any>, navigate: 
     }
 
     if (match[1]) {
-      // PRODUCT block
       const segments = match[1].split('|');
       if (segments.length >= 5) {
         const [id, name, priceStr, imageUrl, slug] = segments;
@@ -85,12 +96,21 @@ function parseSpecialBlocks(text: string, products: Map<string, any>, navigate: 
         );
       }
     } else if (match[2]) {
-      // ORDER block
+      // New format: id:qty:price:customization, separated by commas
       const orderItems = match[2].split(',').map(item => {
-        const [id, qtyStr] = item.trim().split(':');
-        const qty = parseInt(qtyStr) || 1;
-        const prod = products.get(id.trim());
-        return { id: id.trim(), name: prod?.name || 'Товар', price: prod?.price || 0, qty };
+        const colonParts = item.trim().split(':');
+        const id = colonParts[0]?.trim() || '';
+        const qty = parseInt(colonParts[1]) || 1;
+        const customPrice = colonParts[2] ? parseInt(colonParts[2]) : undefined;
+        const customization = colonParts.slice(3).join(':').trim() || undefined;
+        const prod = products.get(id);
+        return {
+          id,
+          name: prod?.name || 'Товар',
+          price: customPrice || prod?.price || 0,
+          qty,
+          customization,
+        };
       });
       parts.push(<OrderBlock key={match.index} items={orderItems} navigate={navigate} />);
     }
@@ -152,7 +172,6 @@ export default function ChatWidget() {
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
-  // Load products for card rendering
   useEffect(() => {
     supabase.from('products').select('id, name, price, image_url, slug').eq('in_stock', true).then(({ data }) => {
       if (data) {
