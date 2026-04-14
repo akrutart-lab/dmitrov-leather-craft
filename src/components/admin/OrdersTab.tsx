@@ -126,9 +126,14 @@ function OrderCard({ order, onStatusChange, onCommentSave }: {
       {order.order_items && order.order_items.length > 0 && (
         <div className="text-sm space-y-1">
           {order.order_items.map(item => (
-            <div key={item.id} className="flex justify-between text-muted-foreground">
-              <span>{item.product_name} × {item.quantity}</span>
-              <span>{new Intl.NumberFormat('ru-RU').format(item.price * item.quantity)} ₽</span>
+            <div key={item.id} className="text-muted-foreground">
+              <div className="flex justify-between">
+                <span>{item.product_name} × {item.quantity}</span>
+                <span>{new Intl.NumberFormat('ru-RU').format(item.price * item.quantity)} ₽</span>
+              </div>
+              {(item as any).customization && (
+                <p className="text-xs italic ml-2 text-muted-foreground/70">✏️ {(item as any).customization}</p>
+              )}
             </div>
           ))}
           <div className="flex justify-between pt-2 border-t border-border text-foreground font-medium">
