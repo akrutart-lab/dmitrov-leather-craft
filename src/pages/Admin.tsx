@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LogOut, ShoppingBag, Package, FolderOpen } from 'lucide-react';
+import { LogOut, ShoppingBag, Package, FolderOpen, MessageCircle } from 'lucide-react';
 import OrdersTab from '@/components/admin/OrdersTab';
 import ProductsTab from '@/components/admin/ProductsTab';
 import CategoriesTab from '@/components/admin/CategoriesTab';
+import ChatsTab from '@/components/admin/ChatsTab';
 
-type Tab = 'orders' | 'products' | 'categories';
+type Tab = 'orders' | 'products' | 'categories' | 'chats';
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('orders');
@@ -36,6 +37,17 @@ export default function Admin() {
     refetchInterval: 30000,
   });
 
+  // Ticket count for chats badge
+  const { data: ticketCount } = useQuery({
+    queryKey: ['admin-ticket-count'],
+    queryFn: async () => {
+      const { count } = await supabase.from('chat_sessions').select('*', { count: 'exact', head: true }).eq('status', 'ticket');
+      return count || 0;
+    },
+    enabled: isAdmin === true,
+    refetchInterval: 15000,
+  });
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/admin/login');
@@ -47,6 +59,7 @@ export default function Admin() {
     { key: 'orders', label: 'Заявки', icon: ShoppingBag, badge: newCount || undefined },
     { key: 'products', label: 'Товары', icon: Package },
     { key: 'categories', label: 'Категории', icon: FolderOpen },
+    { key: 'chats', label: 'Чаты', icon: MessageCircle, badge: ticketCount || undefined },
   ];
 
   return (
@@ -83,6 +96,7 @@ export default function Admin() {
         {tab === 'orders' && <OrdersTab />}
         {tab === 'products' && <ProductsTab />}
         {tab === 'categories' && <CategoriesTab />}
+        {tab === 'chats' && <ChatsTab />}
       </div>
     </div>
   );
