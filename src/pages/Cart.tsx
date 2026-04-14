@@ -14,6 +14,7 @@ export default function Cart() {
     phone: '',
     comment: '',
     delivery: 'pickup',
+    address: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
