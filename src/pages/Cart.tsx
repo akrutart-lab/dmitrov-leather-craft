@@ -34,8 +34,9 @@ export default function Cart() {
           customer_phone: form.phone.trim(),
           customer_comment: form.comment.trim() || null,
           delivery_method: form.delivery,
+          delivery_address: form.delivery === 'delivery' ? (form.address.trim() || null) : null,
           total,
-        })
+        } as any)
         .select()
         .single();
 
