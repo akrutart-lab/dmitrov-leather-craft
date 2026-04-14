@@ -179,20 +179,31 @@ export default function Cart() {
                     { value: 'pickup', label: 'Самовывоз' },
                     { value: 'delivery', label: 'Доставка' },
                   ].map(opt => (
-                    <label key={opt.value} className={`flex-1 border px-4 py-3 text-sm text-center cursor-pointer transition-all ${form.delivery === opt.value ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}>
-                      <input
-                        type="radio"
-                        name="delivery"
-                        value={opt.value}
-                        checked={form.delivery === opt.value}
-                        onChange={e => setForm({ ...form, delivery: e.target.value })}
-                        className="sr-only"
-                      />
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, delivery: opt.value })}
+                      className={`flex-1 border px-4 py-3 text-sm text-center cursor-pointer transition-all ${form.delivery === opt.value ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}
+                    >
                       {opt.label}
-                    </label>
+                    </button>
                   ))}
                 </div>
               </div>
+
+              {form.delivery === 'delivery' && (
+                <div>
+                  <label className="text-xs tracking-wider uppercase text-muted-foreground mb-2 block">Адрес доставки</label>
+                  <input
+                    type="text"
+                    value={form.address}
+                    onChange={e => setForm({ ...form, address: e.target.value })}
+                    placeholder="Город, улица, дом, квартира"
+                    className="w-full bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
+                    maxLength={500}
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="text-xs tracking-wider uppercase text-muted-foreground mb-2 block">Комментарий</label>
