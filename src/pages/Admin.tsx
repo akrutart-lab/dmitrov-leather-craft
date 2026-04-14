@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LogOut, ShoppingBag, Package, FolderOpen } from 'lucide-react';
+import { LogOut, ShoppingBag, Package, FolderOpen, MessageCircle } from 'lucide-react';
 import OrdersTab from '@/components/admin/OrdersTab';
 import ProductsTab from '@/components/admin/ProductsTab';
 import CategoriesTab from '@/components/admin/CategoriesTab';
+import ChatsTab from '@/components/admin/ChatsTab';
 
-type Tab = 'orders' | 'products' | 'categories';
+type Tab = 'orders' | 'products' | 'categories' | 'chats';
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('orders');

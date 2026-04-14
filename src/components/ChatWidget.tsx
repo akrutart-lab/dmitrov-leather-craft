@@ -21,14 +21,14 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Hide on admin pages
-  if (location.pathname.startsWith('/admin')) return null;
-
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+
+  // Hide on admin pages
+  if (location.pathname.startsWith('/admin')) return null;
 
   const handleRegister = async () => {
     if (!name.trim() || !phone.trim() || !agreed) return;
