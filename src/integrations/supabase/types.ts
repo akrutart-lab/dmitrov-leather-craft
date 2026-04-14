@@ -91,6 +91,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_comment: string | null
           created_at: string
           customer_comment: string | null
           customer_name: string
@@ -103,6 +104,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_comment?: string | null
           created_at?: string
           customer_comment?: string | null
           customer_name: string
@@ -115,6 +117,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_comment?: string | null
           created_at?: string
           customer_comment?: string | null
           customer_name?: string
