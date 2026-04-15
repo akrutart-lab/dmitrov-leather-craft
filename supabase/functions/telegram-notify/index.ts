@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-const ADMIN_CHAT_ID = "8730142552";
+const ADMIN_CHAT_ID = "1217840640";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

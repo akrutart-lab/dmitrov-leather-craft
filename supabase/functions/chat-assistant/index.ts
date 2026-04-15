@@ -230,7 +230,7 @@ ${catalog || "Каталог пуст"}
                             "X-Connection-Api-Key": TELEGRAM_API_KEY,
                             "Content-Type": "application/json",
                           },
-                          body: JSON.stringify({ chat_id: "8730142552", text, parse_mode: "HTML" }),
+                          body: JSON.stringify({ chat_id: "1217840640", text, parse_mode: "HTML" }),
                         });
                       }
                     } catch (tgErr) {
