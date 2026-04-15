@@ -56,6 +56,20 @@ export default function Cart() {
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
 
+      // Send Telegram notification (fire and forget)
+      supabase.functions.invoke('telegram-notify', {
+        body: {
+          order_id: orderId,
+          customer_name: form.name.trim(),
+          customer_phone: form.phone.trim(),
+          total,
+          delivery_method: form.delivery,
+          delivery_address: form.delivery === 'delivery' ? (form.address.trim() || null) : null,
+          comment: form.comment.trim() || null,
+          items: orderItems,
+        },
+      }).catch(err => console.error('Telegram notify error:', err));
+
       clear();
       setSent(true);
       toast.success('Заявка отправлена!');
