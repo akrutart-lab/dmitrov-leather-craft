@@ -157,7 +157,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+7');
   const [agreed, setAgreed] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
