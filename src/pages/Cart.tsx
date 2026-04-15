@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Minus, Plus, X, ArrowLeft, Send } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { supabase } from '@/integrations/supabase/client';
+import PhoneInput from '@/components/PhoneInput';
 import { toast } from 'sonner';
 
 export default function Cart() {
@@ -181,13 +182,10 @@ export default function Cart() {
                 </div>
                 <div>
                   <label className="text-xs tracking-wider uppercase text-muted-foreground mb-2 block">Телефон *</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
-                    maxLength={20}
-                    required
+                    onChange={phone => setForm({ ...form, phone })}
+                    className="w-full"
                   />
                 </div>
               </div>
