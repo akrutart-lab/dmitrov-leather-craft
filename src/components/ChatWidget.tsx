@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, User, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/PhoneInput';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
