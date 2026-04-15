@@ -325,7 +325,7 @@ export default function ChatWidget() {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
