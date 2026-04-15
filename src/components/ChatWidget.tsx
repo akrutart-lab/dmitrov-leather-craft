@@ -295,8 +295,8 @@ export default function ChatWidget() {
           {!registered ? (
             <div className="flex-1 flex flex-col justify-center px-6 gap-4">
               <p className="text-sm text-muted-foreground text-center">Представьтесь, чтобы начать чат с консультантом</p>
-              <Input placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} />
-              <Input placeholder="Телефон" type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
+              <input placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} className="bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors" />
+              <PhoneInput value={phone} onChange={setPhone} />
               <label className="flex items-start gap-2 text-xs text-muted-foreground">
                 <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />
                 <span>
