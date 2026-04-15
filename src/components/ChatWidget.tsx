@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, User, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PhoneInput from '@/components/PhoneInput';
