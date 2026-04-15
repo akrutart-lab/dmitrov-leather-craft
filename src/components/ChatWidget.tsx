@@ -96,8 +96,8 @@ function parseSpecialBlocks(text: string, products: Map<string, any>, navigate: 
         );
       }
     } else if (match[2]) {
-      // New format: id:qty:price:customization, separated by commas
-      const orderItems = match[2].split(',').map(item => {
+      // New format: id:qty:price:customization, separated by semicolons
+      const orderItems = match[2].split(';').map(item => {
         const colonParts = item.trim().split(':');
         const id = colonParts[0]?.trim() || '';
         const qty = parseInt(colonParts[1]) || 1;
