@@ -165,12 +165,23 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [productMap, setProductMap] = useState<Map<string, any>>(new Map());
   const bottomRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLen = useRef(0);
 
-  const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  // Scroll to bottom only when new messages arrive (not on open)
+  useEffect(() => {
+    if (messages.length > prevMessagesLen.current && prevMessagesLen.current > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMessagesLen.current = messages.length;
+  }, [messages]);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  // Scroll chat container to top when opened
+  useEffect(() => {
+    if (open && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = 0;
+    }
+  }, [open]);
 
   useEffect(() => {
     supabase.from('products').select('id, name, price, image_url, slug').eq('in_stock', true).then(({ data }) => {
