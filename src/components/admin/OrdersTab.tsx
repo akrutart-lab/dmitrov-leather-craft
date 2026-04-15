@@ -43,7 +43,12 @@ export default function OrdersTab() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-orders'] }); toast.success('Комментарий сохранён'); },
   });
 
-  const newCount = orders?.filter(o => o.status === 'new').length || 0;
+  const counts = {
+    all: orders?.length || 0,
+    new: orders?.filter(o => o.status === 'new').length || 0,
+    in_progress: orders?.filter(o => o.status === 'in_progress').length || 0,
+    completed: orders?.filter(o => o.status === 'completed').length || 0,
+  };
   const filtered = filter === 'all' ? orders : orders?.filter(o => o.status === filter);
 
   if (isLoading) return <p className="text-muted-foreground">Загрузка...</p>;
@@ -52,20 +57,27 @@ export default function OrdersTab() {
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
-        {FILTERS.map(f => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`px-3 py-1.5 text-xs transition-all ${
-              filter === f.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {f.label}
-            {f.value === 'new' && newCount > 0 && (
-              <span className="ml-1.5 bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 rounded-full text-[10px]">{newCount}</span>
-            )}
-          </button>
-        ))}
+        {FILTERS.map(f => {
+          const count = counts[f.value as keyof typeof counts] || 0;
+          const badgeColor = f.value === 'new' ? 'bg-yellow-500/20 text-yellow-500'
+            : f.value === 'in_progress' ? 'bg-blue-400/20 text-blue-400'
+            : f.value === 'completed' ? 'bg-green-400/20 text-green-400'
+            : 'bg-muted-foreground/20 text-muted-foreground';
+          return (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={`px-3 py-1.5 text-xs transition-all ${
+                filter === f.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {f.label}
+              {count > 0 && (
+                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${badgeColor}`}>{count}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {(!filtered || filtered.length === 0) && <p className="text-muted-foreground py-10 text-center">Заявок нет</p>}
