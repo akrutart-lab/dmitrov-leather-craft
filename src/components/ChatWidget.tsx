@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, User, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/PhoneInput';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -157,7 +157,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+7');
   const [agreed, setAgreed] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -165,12 +165,23 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [productMap, setProductMap] = useState<Map<string, any>>(new Map());
   const bottomRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLen = useRef(0);
 
-  const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  // Scroll to bottom only when new messages arrive (not on open)
+  useEffect(() => {
+    if (messages.length > prevMessagesLen.current && prevMessagesLen.current > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMessagesLen.current = messages.length;
+  }, [messages]);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  // Scroll chat container to top when opened
+  useEffect(() => {
+    if (open && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = 0;
+    }
+  }, [open]);
 
   useEffect(() => {
     supabase.from('products').select('id, name, price, image_url, slug').eq('in_stock', true).then(({ data }) => {
@@ -295,8 +306,8 @@ export default function ChatWidget() {
           {!registered ? (
             <div className="flex-1 flex flex-col justify-center px-6 gap-4">
               <p className="text-sm text-muted-foreground text-center">Представьтесь, чтобы начать чат с консультантом</p>
-              <Input placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} />
-              <Input placeholder="Телефон" type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
+              <input placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} className="bg-transparent border border-border px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors" />
+              <PhoneInput value={phone} onChange={setPhone} />
               <label className="flex items-start gap-2 text-xs text-muted-foreground">
                 <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />
                 <span>
@@ -314,7 +325,7 @@ export default function ChatWidget() {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
